@@ -1,0 +1,16 @@
+<!-- res/values/styles.xml -->
+<resources>
+    <!-- 定义日间模式下的主题 -->
+    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <!-- 其他主题属性 -->
+        <item name="colorPrimary">@color/theme_blue</item>
+        <item name="colorButtonNormal">@color/theme_blue</item>
+    </style>
+
+    <!-- 定义夜间模式下的主题 -->
+    <style name="AppTheme.Night" parent="Theme.AppCompat.DayNight.NoActionBar">
+        <!-- 其他主题属性 -->
+        <item name="colorPrimary">@color/theme_blue</item>
+        <item name="colorButtonNormal">@color/theme_blue</item>
+    </style>
+</resources>

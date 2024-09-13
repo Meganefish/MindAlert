@@ -1,0 +1,40 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/mindalert"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/mindalert_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.MindAlert"
+        tools:targetApi="31">
+
+        <!-- 注册 MusicService -->
+        <service
+            android:name=".MusicService"
+            android:enabled="true"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.example.mindalert.MyService"/>
+            </intent-filter>
+        </service>
+        <service
+            android:name=".AnalyzeService"
+            android:enabled="true"
+            android:exported="false">
+        </service>
+        <!-- MainActivity 作为应用启动的入口 -->
+        <activity
+            android:name=".MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>

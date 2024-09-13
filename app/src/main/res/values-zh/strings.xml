@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="title_activity_chart">ChartActivity</string>
+    <string name="analyze_fragment_label">选项</string>
+    <string name="map_fragment_label">定位</string>
+    <string name="music_fragment_label">音乐</string>
+    <string name="options_fragment_lable">选项</string>
+    <string name="connect">连接</string>
+    <string name="music_next">下一曲</string>
+    <string name="music_previous">上一曲</string>
+    <string name="now_playing">正在播放：%1$s.mp3</string>
+    <string name="app_name">心知</string>
+
+    <string-array name="themes_options">
+        <item>浅色</item>
+        <item>深色</item>
+        <item>跟随系统</item>
+    </string-array>
+
+    <string-array name="language_options">
+        <item>English</item>
+        <item>中文</item>
+    </string-array>
+    <string name="theme_options">主题</string>
+    <string name="language_options">语言</string>
+    <string name="music_pause">暂停</string>
+    <string name="music_play">播放</string>
+    <string name="raw_data">原始数据可视化</string>
+    <string name="fatigue">疲劳度</string>
+    <string name="wake">清醒度</string>
+    <string name="state">状态：%1$s</string>
+    <string name="state_fatigue">疲劳</string>
+    <string name="state_wake">清醒</string>
+
+</resources>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="blue">#180846</color>
+    <color name="transparent">#00FFFFFF</color>
+    <color name="grey">#CCCCCC</color>
+
+    <color name="axis_text_color">#FFFFFF</color>
+    <color name="axis_title_color">#DDDDDD</color>
+    <color name="axis_line_color">#666666</color>
+
+
+</resources>
