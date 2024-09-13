@@ -2,7 +2,7 @@ tjcs-STIP项目，编写一个android应用，检测驾驶人员疲劳程度，�
 
 应用名为MindAlert，mainActivity为主类，在MainActivity中存在四个Fragment内容，分别为AnlyzeFragment、MapFragment、MusicFragment、OptionsFragment，分别实现分析功能、定位功能、音乐播放功能、主题设置功能。
 此外，为实现音乐播放、数据读取在后台实现，添加了AnlyzeService、MusicService服务类，与MainActivity绑定。
-【已删除】为实现实时监听数据读取内容，添加了AnalyzeViewModel、AnalyzeViewModelFactory两个类，后因为功能多余和模型简化删去了这两个类。
+为实现实时监听数据读取内容，添加了AnalyzeViewModel、AnalyzeViewModelFactory两个类，AnalyzeViewModel在AnlyzeFragment中设置监听，检测到anlyzeService对象中数据的改变时进行实时图表绘制，AnalyzeViewModelFactory添加对AnalyzeViewModel类的初始化配置。
 
 已实现的功能：
 音乐播放功能
