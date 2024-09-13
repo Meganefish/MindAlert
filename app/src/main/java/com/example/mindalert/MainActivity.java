@@ -37,8 +37,10 @@ public class MainActivity extends AppCompatActivity {
     private float initialX, initialY; // 初始位置
     private static final int CLICK_THRESHOLD = 100; // 点击的阈值
     private AnalyzeService analyzeService;
+    private MusicService musicService;
+    private boolean isDataRead = false;
     private boolean isAnalyzeServiceBound = false;
-    private MutableLiveData<AnalyzeService> analyzeServiceLiveData = new MutableLiveData<>();
+    private boolean isMusicServiceBound = false;
 
     private ServiceConnection analyzeServiceConnection = new ServiceConnection() {
         @Override
@@ -46,9 +48,7 @@ public class MainActivity extends AppCompatActivity {
             AnalyzeService.LocalBinder binder = (AnalyzeService.LocalBinder) service;
             analyzeService = binder.getService();
             isAnalyzeServiceBound = true;
-            // 确保在连接成功后更新图表
             if (analyzeService != null) {
-                //analyzeService.startReadingData();
                 Log.d(TAG,"AnalyzeService Connection Created");
             } else {
                 Log.e(TAG, "AnalyzeService is null after onServiceConnected");
@@ -60,6 +60,27 @@ public class MainActivity extends AppCompatActivity {
             isAnalyzeServiceBound = false;
             analyzeService = null;  // 确保服务断开时清空
             Log.d(TAG, "AnalyzeService disconnected");  // 调试信息
+        }
+    };
+
+    private ServiceConnection musicServiceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            MusicService.LocalBinder binder = (MusicService.LocalBinder) service;
+            musicService = binder.getService();
+            isMusicServiceBound = true;
+            if (musicService != null) {
+                Log.d(TAG,"MusicService Connection Created");
+            } else {
+                Log.e(TAG, "MusicService is null after onServiceConnected");
+            }
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            isMusicServiceBound = false;
+            musicService = null;  // 确保服务断开时清空
+            Log.d(TAG, "MusicService disconnected");  // 调试信息
         }
     };
 
@@ -83,8 +104,12 @@ public class MainActivity extends AppCompatActivity {
         }
 
         // 启动 MusicService
-        Intent serviceIntent = new Intent(this, MusicService.class);
-        startService(serviceIntent);
+        Intent musicIntent = new Intent(this, MusicService.class);
+        startService(musicIntent);
+        boolean musicServiceBound =  this.bindService(musicIntent, musicServiceConnection, Context.BIND_AUTO_CREATE);
+        if (!musicServiceBound) {
+            Log.e(TAG, "Failed to bind MusicService");  // 检查服务绑定是否成功
+        }
 
         btnAnalyze = findViewById(R.id.btn_analyze);
         btnMap = findViewById(R.id.btn_map);
@@ -135,6 +160,7 @@ public class MainActivity extends AppCompatActivity {
         fabConnect.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                isDataRead = true;
                 analyzeService.startReadingData();
             }
         });
@@ -154,6 +180,11 @@ public class MainActivity extends AppCompatActivity {
             isAnalyzeServiceBound = false;
             Log.d(TAG, "AnalyzeService Unbound");
         }
+        if(isMusicServiceBound){
+            this.unbindService(musicServiceConnection);
+            isMusicServiceBound = false;
+            Log.d(TAG, "MusicService Unbound");
+        }
     }
 
 
@@ -171,11 +202,15 @@ public class MainActivity extends AppCompatActivity {
     public AnalyzeService getAnalyzeService(){
         return this.analyzeService;
     }
+    public MusicService getMusicService() {return this.musicService; }
+    public boolean getIsMusicServiceBound(){
+        return this.isMusicServiceBound;
+    }
+    public boolean getIsDataRead(){
+        return this.isDataRead;
+    }
 
     // 提供一个方法获取LiveData
-    public LiveData<AnalyzeService> getAnalyzeServiceLiveData() {
-        return analyzeServiceLiveData;
-    }
     private void loadSavedTheme() {
         SharedPreferences sharedPreferences = getSharedPreferences("AppSettings", MODE_PRIVATE);
         String theme = sharedPreferences.getString("Theme", "Light"); // 默认值为“Light”

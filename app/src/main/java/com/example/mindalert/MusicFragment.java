@@ -34,26 +34,7 @@ public class MusicFragment extends Fragment implements View.OnClickListener {
     private Handler handler = new Handler();
     private ObjectAnimator rotationAnimator;
     private boolean isUserSeeking = false; // 用于跟踪用户是否在拖动进度条
-    private MusicService musicService;
-    private boolean isBound = false; // 用于跟踪 Service 是否已绑定
-
-    private ServiceConnection serviceConnection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            MusicService.LocalBinder binder = (MusicService.LocalBinder) service;
-            musicService = binder.getService();
-            isBound = true;
-            Log.d(TAG, "Service connected");  // 调试信息
-            updateUI();  // 确保在连接成功后更新UI
-            updateSongName(); // 更新歌曲名称
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            isBound = false;
-            Log.d(TAG, "Service disconnected");  // 调试信息
-        }
-    };
+    private MainActivity mainActivity;
 
     private BroadcastReceiver songChangedReceiver = new BroadcastReceiver() {
         @Override
@@ -65,8 +46,7 @@ public class MusicFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Intent intent = new Intent(getActivity(), MusicService.class);
-        getActivity().bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
+        mainActivity = (MainActivity) getActivity();
     }
 
     @Nullable
@@ -75,7 +55,6 @@ public class MusicFragment extends Fragment implements View.OnClickListener {
         View view = inflater.inflate(R.layout.fragment_music, container, false);
 
         ivMusic = view.findViewById(R.id.iv_music);
-        //songName = view.findViewById(R.id.song_name);
         tvProgress = view.findViewById(R.id.tv_progress);
         tvTotal = view.findViewById(R.id.tv_total);
         sb = view.findViewById(R.id.sb);
@@ -90,7 +69,7 @@ public class MusicFragment extends Fragment implements View.OnClickListener {
         sb.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                if (fromUser && isBound) {
+                if (fromUser && mainActivity.getIsMusicServiceBound()) {
                     isUserSeeking = true;
                     tvProgress.setText(formatTime(progress));
                 }
@@ -103,8 +82,8 @@ public class MusicFragment extends Fragment implements View.OnClickListener {
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                if (isBound) {
-                    musicService.seekTo(seekBar.getProgress());
+                if (mainActivity.getIsMusicServiceBound()) {
+                    mainActivity.getMusicService().seekTo(seekBar.getProgress());
                     isUserSeeking = false;
                 }
             }
@@ -120,20 +99,11 @@ public class MusicFragment extends Fragment implements View.OnClickListener {
         // 注册广播接收器
         IntentFilter filter = new IntentFilter("com.example.mindalert.SONG_CHANGED");
         getActivity().registerReceiver(songChangedReceiver, filter);
-        Intent intent = new Intent(getActivity(), MusicService.class);
-        getActivity().startService(intent);
-        boolean bindResult = getActivity().bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
-        Log.d(TAG, "Service started and bind result: " + bindResult);  // 检查绑定是否成功
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        if (isBound) {
-            getActivity().unbindService(serviceConnection);
-            isBound = false;
-            Log.d(TAG, "Service unbound");  // 调试信息
-        }
         // 注销广播接收器
         getActivity().unregisterReceiver(songChangedReceiver);
 
@@ -142,10 +112,6 @@ public class MusicFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (isBound) {
-            getActivity().unbindService(serviceConnection);
-            isBound = false;
-        }
     }
 
     private void setupRotationAnimator() {
@@ -156,9 +122,9 @@ public class MusicFragment extends Fragment implements View.OnClickListener {
     }
 
     private void updateUI() {
-        if (musicService != null) {
-            sb.setMax(musicService.getDuration());
-            tvTotal.setText(formatTime(musicService.getDuration()));
+        if (mainActivity.getMusicService() != null) {
+            sb.setMax(mainActivity.getMusicService().getDuration());
+            tvTotal.setText(formatTime(mainActivity.getMusicService().getDuration()));
             handler.post(updateSeekBar);
         }
     }
@@ -166,8 +132,8 @@ public class MusicFragment extends Fragment implements View.OnClickListener {
     private Runnable updateSeekBar = new Runnable() {
         @Override
         public void run() {
-            if (isBound && musicService != null && !isUserSeeking) {
-                int currentPosition = musicService.getCurrentPosition();
+            if (mainActivity.getIsMusicServiceBound() && mainActivity.getMusicService() != null && !isUserSeeking) {
+                int currentPosition = mainActivity.getMusicService().getCurrentPosition();
                 sb.setProgress(currentPosition);
                 tvProgress.setText(formatTime(currentPosition));
                 handler.postDelayed(this, 1000);
@@ -178,29 +144,29 @@ public class MusicFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onClick(View v) {
         Button btn_play = getView().findViewById(R.id.btn_play_pause);
-        if (isBound) {
+        if (mainActivity.getIsMusicServiceBound()) {
             if(v.getId() == R.id.btn_previous){
-                musicService.playPreviousSong();
+                mainActivity.getMusicService().playPreviousSong();
                 updateSongName(); // 更新歌曲名称
                 btn_play.setText(R.string.music_pause);
                 rotationAnimator.start();
                 Log.d(TAG, "Previous button clicked");  // 调试信息
             }
             else if(v.getId() == R.id.btn_play_pause){
-                if(musicService.isPlaying()){
-                    musicService.pauseMusic();
+                if(mainActivity.getMusicService().isPlaying()){
+                    mainActivity.getMusicService().pauseMusic();
                     btn_play.setText(R.string.music_play);
                     rotationAnimator.pause();
                     Log.d(TAG, "Pause button clicked");  // 调试信息
                 }else{
-                    musicService.playMusic();
+                    mainActivity.getMusicService().playMusic();
                     btn_play.setText(R.string.music_pause);
                     rotationAnimator.start();
                     Log.d(TAG, "Pause button clicked");  // 调试信息
                 }
             }
             else if(v.getId() == R.id.btn_next){
-                musicService.playNextSong();
+                mainActivity.getMusicService().playNextSong();
                 updateSongName(); // 更新歌曲名称
                 btn_play.setText(R.string.music_pause);
                 rotationAnimator.start();
@@ -221,14 +187,14 @@ public class MusicFragment extends Fragment implements View.OnClickListener {
     private void updateSongName() {
         if (getContext() != null) {
             // 使用 getContext().getResources() 确保获取到资源
-            int currentId = musicService.getCurrentSongResId();
-            String title = musicService.getSongList().get(currentId).getTitle();
+            int currentId = mainActivity.getMusicService().getCurrentSongResId();
+            String title = mainActivity.getMusicService().getSongList().get(currentId).getTitle();
             //String displayName = getContext().getResources().getString(R.string.now_playing, musicService.getSongList().get(musicService.getCurrentSongResId()).getTitle());
             TextView songNameTextView = getView().findViewById(R.id.song_name);
             if (songNameTextView != null) {
                 //songNameTextView.setText(displayName);
                 songNameTextView.setText(title);
-                tvTotal.setText(formatTime(musicService.getDuration()));
+                tvTotal.setText(formatTime(mainActivity.getMusicService().getDuration()));
             } else {
                 Log.e(TAG, "songNameTextView is null. Check the view initialization.");
             }

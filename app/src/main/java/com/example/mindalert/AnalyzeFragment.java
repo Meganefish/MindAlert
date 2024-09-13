@@ -40,33 +40,17 @@ import java.util.List;
 
 public class AnalyzeFragment extends Fragment {
     private View view;
+    private static int height = 0;
     private MainActivity mainActivity;
     private final static String TAG = "AnalyseFragment";
-    private MusicService musicService;
-    private boolean isMusicServiceBound = false;
     private ImageView playPauseButton;
     private ImageView nextButton;
     private TextView nowPlayingText;
     private View fatigueBar, wakeBar;
-    private AnalyzeViewModel analyzeViewModel; // ViewModel用于与Service交互
     private TextView state;
     private LineChart lineChart;
-    private ServiceConnection musicServiceConnection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName className, IBinder service) {
-            MusicService.LocalBinder binder = (MusicService.LocalBinder) service;
-            musicService = binder.getService();
-            isMusicServiceBound = true;
-            Log.d(TAG, "MusicService connected");  // 调试信息
-            updateUI();
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName arg0) {
-            isMusicServiceBound = false;
-            Log.d(TAG, "MusicService disconnected");  // 调试信息
-        }
-    };
+    private Handler analyzeHandler = new Handler();
+    private Runnable updateAnalyzeTask;
     private BroadcastReceiver songChangedReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -74,31 +58,9 @@ public class AnalyzeFragment extends Fragment {
         }
     };
 
-    // 定义两个观察者
-    private final Observer<List<Entry>> fatigueObserver = new Observer<List<Entry>>() {
-        @Override
-        public void onChanged(List<Entry> entries) {
-            mainActivity.getAnalyzeService().fatigueEntries = entries; // 更新数据
-            updateLineChart(); // 更新图表
-        }
-    };
-
-    private final Observer<List<Entry>> wakeObserver = new Observer<List<Entry>>() {
-        @Override
-        public void onChanged(List<Entry> entries) {
-            mainActivity.getAnalyzeService().wakeEntries = entries; // 更新数据
-            updateLineChart(); // 更新图表
-        }
-    };
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Intent musicIntent = new Intent(getActivity(), MusicService.class);
-        boolean musicServiceBound = getActivity().bindService(musicIntent, musicServiceConnection, Context.BIND_AUTO_CREATE);
-        if (!musicServiceBound) {
-            Log.e(TAG, "Failed to bind MusicService");  // 检查服务绑定是否成功
-        }
     }
 
     @Override
@@ -123,42 +85,41 @@ public class AnalyzeFragment extends Fragment {
         wakeBar = view.findViewById(R.id.wake_bar);
         state = view.findViewById(R.id.tv_state);
 
-        mainActivity.getAnalyzeServiceLiveData().observe(getViewLifecycleOwner(), new Observer<AnalyzeService>() {
-            @Override
-            public void onChanged(AnalyzeService analyzeService) {
-                if (analyzeService != null) {
-                    // 使用自定义的ViewModelProvider.Factory来获取ViewModel
-                    AnalyzeViewModelFactory factory = new AnalyzeViewModelFactory(analyzeService);
-                    analyzeViewModel = new ViewModelProvider(AnalyzeFragment.this, factory).get(AnalyzeViewModel.class);
-
-                    // 注册LiveData观察者
-                    analyzeViewModel.getFatigueEntries().observe(getViewLifecycleOwner(), fatigueObserver);
-                    analyzeViewModel.getWakeEntries().observe(getViewLifecycleOwner(), wakeObserver);
-                }
-            }
-        });
         playPauseButton = view.findViewById(R.id.analyze_play_pause);
         nextButton = view.findViewById(R.id.analyze_next);
         nowPlayingText = view.findViewById(R.id.now_playing);
 
         playPauseButton.setOnClickListener(v -> {
-            if (isMusicServiceBound) {
-                if (musicService.isPlaying()) {
-                    musicService.pauseMusic();
+            if (mainActivity.getIsMusicServiceBound()) {
+                if (mainActivity.getMusicService().isPlaying()) {
+                    mainActivity.getMusicService().pauseMusic();
                     playPauseButton.setImageResource(R.drawable.round_play_icon);
                 } else {
-                    musicService.playMusic();
+                    mainActivity.getMusicService().playMusic();
                     playPauseButton.setImageResource(R.drawable.round_pause_icon);
                 }
                 updateUI();
             }
         });
         nextButton.setOnClickListener(v -> {
-            if (isMusicServiceBound) {
-                musicService.playNextSong();
+            if (mainActivity.getIsMusicServiceBound()) {
+                mainActivity.getMusicService().playNextSong();
                 updateUI();
             }
         });
+        updateAnalyzeTask = new Runnable() {
+            @Override
+            public void run() {
+                if(mainActivity.getIsDataRead()){
+                    updateLineChart();
+                    updateBar();
+                    updateState();
+                }
+                analyzeHandler.postDelayed(this,1000);
+            }
+        };
+        analyzeHandler.post(updateAnalyzeTask);
+
         return view;
     }
 
@@ -168,24 +129,6 @@ public class AnalyzeFragment extends Fragment {
         // 注册广播接收器
         IntentFilter filter = new IntentFilter("com.example.mindalert.SONG_CHANGED");
         getActivity().registerReceiver(songChangedReceiver, filter);
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        if(analyzeViewModel==null)
-            return;
-        // 在Fragment可见时，添加观察者
-        analyzeViewModel.getFatigueEntries().observe(getViewLifecycleOwner(), fatigueObserver);
-        analyzeViewModel.getWakeEntries().observe(getViewLifecycleOwner(), wakeObserver);
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        // 在Fragment不可见时，移除观察者，避免占用计算资源
-        analyzeViewModel.getFatigueEntries().removeObserver(fatigueObserver);
-        analyzeViewModel.getWakeEntries().removeObserver(wakeObserver);
     }
 
 
@@ -199,59 +142,53 @@ public class AnalyzeFragment extends Fragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (isMusicServiceBound) {
-            getActivity().unbindService(musicServiceConnection);
-            isMusicServiceBound = false;
-            Log.d(TAG, "MusicService Unbound");
-        }
+        analyzeHandler.removeCallbacks(updateAnalyzeTask);
     }
 
 
     private void updateUI() {
-        if (isMusicServiceBound) {
-            if (musicService.isPlaying()) {
+        if (mainActivity.getIsMusicServiceBound()) {
+            if (mainActivity.getMusicService().isPlaying()) {
                 playPauseButton.setImageResource(R.drawable.round_pause_icon);
             } else {
                 playPauseButton.setImageResource(R.drawable.round_play_icon);
             }
 
-            String nowPlaying = musicService.getSongList().get(musicService.getCurrentSongResId()).getTitle();
+            String nowPlaying = mainActivity.getMusicService().getSongList().get(mainActivity.getMusicService().getCurrentSongResId()).getTitle();
             String formattedText = String.format(getString(R.string.now_playing), nowPlaying);  // 格式化文本
             nowPlayingText.setText(formattedText);
         }
     }
 
     private void updateBar() {
-        MainActivity mainActivity = (MainActivity) getActivity();
-        float fatigue = mainActivity.getAnalyzeService().fatigueEntries.get(0).getY();
-        float wake = mainActivity.getAnalyzeService().wakeEntries.get(0).getY();
-        getActivity().runOnUiThread(() -> {
-            int height = view.findViewById(R.id.fatigue_layout).getHeight();
+        int index = mainActivity.getAnalyzeService().fatigueEntries.size() - 1;
+        float fatigue = mainActivity.getAnalyzeService().fatigueEntries.get(index).getY();
+        float wake = mainActivity.getAnalyzeService().wakeEntries.get(index).getY();
 
-            ViewGroup.LayoutParams fatigueParams = fatigueBar.getLayoutParams();
-            fatigueParams.height = (int) (height * (fatigue / 100.0) * 0.7);
-            fatigueBar.setLayoutParams(fatigueParams);
+        if(height == 0)
+            height = view.findViewById(R.id.fatigue_layout).getHeight();
 
-            ViewGroup.LayoutParams wakeParams = wakeBar.getLayoutParams();
-            wakeParams.height = (int) (height * (wake / 100.0) * 0.7);
-            wakeBar.setLayoutParams(wakeParams);
-        });
+        ViewGroup.LayoutParams fatigueParams = fatigueBar.getLayoutParams();
+        fatigueParams.height = (int) (height * (fatigue / 100.0) * 0.7);
+        fatigueBar.setLayoutParams(fatigueParams);
+
+        ViewGroup.LayoutParams wakeParams = wakeBar.getLayoutParams();
+        wakeParams.height = (int) (height * (wake / 100.0) * 0.7);
+        wakeBar.setLayoutParams(wakeParams);
     }
 
     private void updateState() {
-        MainActivity mainActivity = (MainActivity) getActivity();
-        float fatigue = mainActivity.getAnalyzeService().fatigueEntries.get(0).getY();
-        float wake = mainActivity.getAnalyzeService().wakeEntries.get(0).getY();
-        getActivity().runOnUiThread(() -> {
-            String formattedText;
-            if (fatigue > wake) {
-                formattedText = String.format(getString(R.string.state), getString(R.string.state_fatigue));  // 格式化文本
-                state.setText(formattedText);
-            } else {
-                formattedText = String.format(getString(R.string.state), getString(R.string.state_wake));  // 格式化文本
-                state.setText(formattedText);
-            }
-        });
+        int index = mainActivity.getAnalyzeService().fatigueEntries.size() - 1;
+        float fatigue = mainActivity.getAnalyzeService().fatigueEntries.get(index).getY();
+        float wake = mainActivity.getAnalyzeService().wakeEntries.get(index).getY();
+        String formattedText;
+        if (fatigue > wake) {
+            formattedText = String.format(getString(R.string.state), getString(R.string.state_fatigue));  // 格式化文本
+            state.setText(formattedText);
+        } else {
+            formattedText = String.format(getString(R.string.state), getString(R.string.state_wake));  // 格式化文本
+            state.setText(formattedText);
+        }
     }
 
     private void updateLineChart() {
