@@ -8,7 +8,7 @@
     <string name="connect">连接</string>
     <string name="music_next">下一曲</string>
     <string name="music_previous">上一曲</string>
-    <string name="now_playing">正在播放：%1$s.mp3</string>
+    <string name="now_playing">正在播放：%1$s</string>
     <string name="app_name">心知</string>
 
     <string-array name="themes_options">

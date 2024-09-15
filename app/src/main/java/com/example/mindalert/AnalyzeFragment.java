@@ -119,7 +119,7 @@ public class AnalyzeFragment extends Fragment {
             }
         };
         analyzeHandler.post(updateAnalyzeTask);
-
+        updateUI();
         return view;
     }
 
@@ -129,6 +129,12 @@ public class AnalyzeFragment extends Fragment {
         // 注册广播接收器
         IntentFilter filter = new IntentFilter("com.example.mindalert.SONG_CHANGED");
         getActivity().registerReceiver(songChangedReceiver, filter);
+    }
+
+    @Override
+    public void onResume(){
+        super.onResume();
+        updateUI();
     }
 
 
@@ -147,6 +153,7 @@ public class AnalyzeFragment extends Fragment {
 
 
     private void updateUI() {
+        String nowPlaying, formattedText;
         if (mainActivity.getIsMusicServiceBound()) {
             if (mainActivity.getMusicService().isPlaying()) {
                 playPauseButton.setImageResource(R.drawable.round_pause_icon);
@@ -154,8 +161,11 @@ public class AnalyzeFragment extends Fragment {
                 playPauseButton.setImageResource(R.drawable.round_play_icon);
             }
 
-            String nowPlaying = mainActivity.getMusicService().getSongList().get(mainActivity.getMusicService().getCurrentSongResId()).getTitle();
-            String formattedText = String.format(getString(R.string.now_playing), nowPlaying);  // 格式化文本
+            nowPlaying = mainActivity.getMusicService().getSongList().get(mainActivity.getMusicService().getCurrentSongResId()).getTitle();
+            formattedText = String.format(getString(R.string.now_playing), nowPlaying);  // 格式化文本
+            nowPlayingText.setText(formattedText);
+        }else{
+            formattedText = String.format(getString(R.string.now_playing), "");  // 格式化文本
             nowPlayingText.setText(formattedText);
         }
     }
@@ -169,11 +179,11 @@ public class AnalyzeFragment extends Fragment {
             height = view.findViewById(R.id.fatigue_layout).getHeight();
 
         ViewGroup.LayoutParams fatigueParams = fatigueBar.getLayoutParams();
-        fatigueParams.height = (int) (height * (fatigue / 100.0) * 0.7);
+        fatigueParams.height = (int) (height * (fatigue / 100.0) * 0.7) + 5;
         fatigueBar.setLayoutParams(fatigueParams);
 
         ViewGroup.LayoutParams wakeParams = wakeBar.getLayoutParams();
-        wakeParams.height = (int) (height * (wake / 100.0) * 0.7);
+        wakeParams.height = (int) (height * (wake / 100.0) * 0.7) + 5;
         wakeBar.setLayoutParams(wakeParams);
     }
 

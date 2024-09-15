@@ -18,7 +18,7 @@
     <string name="music_previous">Previous</string>
     <string name="music_pause">pause</string>
     <string name="music_play">play</string>
-    <string name="now_playing">Now playing: %1$s.mp3</string>
+    <string name="now_playing">Now playing: %1$s</string>
 
     <string name="theme_options">Theme</string>
     <!-- Theme Options -->

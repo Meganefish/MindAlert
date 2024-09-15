@@ -99,6 +99,22 @@ public class MusicFragment extends Fragment implements View.OnClickListener {
         // 注册广播接收器
         IntentFilter filter = new IntentFilter("com.example.mindalert.SONG_CHANGED");
         getActivity().registerReceiver(songChangedReceiver, filter);
+        updateSongName();
+        updateUI();
+        handler.post(updateSeekBar);
+    }
+
+    @Override
+    public void onResume(){
+        super.onResume();
+        updateSongName();
+        updateUI();
+        if(mainActivity.getMusicService().isPlaying()){
+            btnPause.setText(R.string.music_pause);
+            rotationAnimator.start();
+        }else{
+            btnPause.setText(R.string.music_play);
+        }
     }
 
     @Override
@@ -106,7 +122,6 @@ public class MusicFragment extends Fragment implements View.OnClickListener {
         super.onStop();
         // 注销广播接收器
         getActivity().unregisterReceiver(songChangedReceiver);
-
     }
 
     @Override
@@ -125,7 +140,6 @@ public class MusicFragment extends Fragment implements View.OnClickListener {
         if (mainActivity.getMusicService() != null) {
             sb.setMax(mainActivity.getMusicService().getDuration());
             tvTotal.setText(formatTime(mainActivity.getMusicService().getDuration()));
-            handler.post(updateSeekBar);
         }
     }
 
@@ -148,6 +162,7 @@ public class MusicFragment extends Fragment implements View.OnClickListener {
             if(v.getId() == R.id.btn_previous){
                 mainActivity.getMusicService().playPreviousSong();
                 updateSongName(); // 更新歌曲名称
+                updateUI();
                 btn_play.setText(R.string.music_pause);
                 rotationAnimator.start();
                 Log.d(TAG, "Previous button clicked");  // 调试信息
@@ -168,6 +183,7 @@ public class MusicFragment extends Fragment implements View.OnClickListener {
             else if(v.getId() == R.id.btn_next){
                 mainActivity.getMusicService().playNextSong();
                 updateSongName(); // 更新歌曲名称
+                updateUI();
                 btn_play.setText(R.string.music_pause);
                 rotationAnimator.start();
                 Log.d(TAG, "Next button clicked");  // 调试信息
@@ -192,9 +208,7 @@ public class MusicFragment extends Fragment implements View.OnClickListener {
             //String displayName = getContext().getResources().getString(R.string.now_playing, musicService.getSongList().get(musicService.getCurrentSongResId()).getTitle());
             TextView songNameTextView = getView().findViewById(R.id.song_name);
             if (songNameTextView != null) {
-                //songNameTextView.setText(displayName);
                 songNameTextView.setText(title);
-                tvTotal.setText(formatTime(mainActivity.getMusicService().getDuration()));
             } else {
                 Log.e(TAG, "songNameTextView is null. Check the view initialization.");
             }
