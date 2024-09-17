@@ -8,7 +8,6 @@ android {
 
     defaultConfig {
         applicationId = "com.example.mindalert"
-        //minSdk = 30
         minSdk = 30
         targetSdk = 34
         versionCode = 1
