@@ -68,7 +68,7 @@ public class AnalyzeService extends Service {
             int fatigue = 0;
             int wake = 0;
 
-            // 读取文件中的数据
+             //读取文件中的数据
 //                while ((line = reader.readLine()) != null) {
 //                    if (line.startsWith("fatigue:")) {
 //                        fatigue = Integer.parseInt(line.replace("fatigue:", "").trim());
@@ -76,11 +76,13 @@ public class AnalyzeService extends Service {
 //                        wake = Integer.parseInt(line.replace("wake:", "").trim());
 //                    }
 //                }
+
+            //读取文件中的数据
             int k = getReadLine();
             for(int i = 0; i < k && (line = reader.readLine()) != null; ++i){
-                fatigue = Integer.parseInt(line.replace("fatigue:", "").trim());
-                line = reader.readLine();
                 wake = Integer.parseInt(line.replace("wake:", "").trim());
+                line = reader.readLine();
+                fatigue = Integer.parseInt(line.replace("fatigue:", "").trim());
             }
             fatigueEntries.add(new Entry(getReadLine(), fatigue));
             wakeEntries.add(new Entry(getReadLine(), wake));

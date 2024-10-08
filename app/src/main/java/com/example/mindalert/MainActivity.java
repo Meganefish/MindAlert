@@ -160,8 +160,9 @@ public class MainActivity extends AppCompatActivity {
         fabConnect.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if(!isDataRead)
+                    analyzeService.startReadingData();
                 isDataRead = true;
-                analyzeService.startReadingData();
             }
         });
         // 默认显示 AnalyzeFragment
