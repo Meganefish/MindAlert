@@ -15,6 +15,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.LinearInterpolator;
 import android.widget.Button;
+import android.widget.ExpandableListView;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -24,6 +25,10 @@ import android.content.BroadcastReceiver;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 public class MusicFragment extends Fragment implements View.OnClickListener {
     private static final String TAG = "MusicFragment";  // 添加日志TAG
@@ -35,6 +40,10 @@ public class MusicFragment extends Fragment implements View.OnClickListener {
     private ObjectAnimator rotationAnimator;
     private boolean isUserSeeking = false; // 用于跟踪用户是否在拖动进度条
     private MainActivity mainActivity;
+    private ExpandableListView expandableMusicListView;
+    private MusicExpandableListAdapter adapter;
+    private List<String> groupList; // 组名称，如 "pop", "metal"
+    private HashMap<String, List<String>> songMap; // 每个组对应的歌曲列表
 
     private BroadcastReceiver songChangedReceiver = new BroadcastReceiver() {
         @Override
@@ -66,6 +75,29 @@ public class MusicFragment extends Fragment implements View.OnClickListener {
         btnPause.setOnClickListener(this);
         btnNext.setOnClickListener(this);
 
+        expandableMusicListView = view.findViewById(R.id.expandable_music_list);
+
+        // 初始化数据
+        groupList = new ArrayList<>();
+        songMap = new HashMap<>();
+        adapter = new MusicExpandableListAdapter(getContext(), groupList, songMap);
+        expandableMusicListView.setAdapter(adapter);
+
+        // ExpandableListView 点击事件处理
+        expandableMusicListView.setOnChildClickListener((parent, v, groupPosition, childPosition, id) -> {
+            if (mainActivity.getIsMusicServiceBound()) {
+                String group = groupList.get(groupPosition);
+                String songTitle = songMap.get(group).get(childPosition);
+                int songIndex = mainActivity.getMusicService().getSongIndexByTitle(songTitle);
+                if (songIndex != -1) {
+                    mainActivity.getMusicService().playSongAtIndex(songIndex);
+                    updateSongName();
+                    updateUI();
+                }
+            }
+            return false;
+        });
+
         sb.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -96,12 +128,49 @@ public class MusicFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onStart() {
         super.onStart();
+        // 加载音乐列表并更新UI
+        //if (mainActivity.getIsMusicServiceBound()) {
+            loadSongList();
+        //}
         // 注册广播接收器
         IntentFilter filter = new IntentFilter("com.example.mindalert.SONG_CHANGED");
         getActivity().registerReceiver(songChangedReceiver, filter);
         updateSongName();
         updateUI();
         handler.post(updateSeekBar);
+    }
+
+    private void loadSongList() {
+        // 从 MusicService 获取歌曲列表
+        List<MusicService.Song> songs = mainActivity.getMusicService().getSongList();
+
+        // 清除旧数据
+        groupList.clear();
+        songMap.clear();
+
+        // 分类歌曲到不同的组
+        List<String> popSongs = new ArrayList<>();
+        List<String> metalSongs = new ArrayList<>();
+
+        for (MusicService.Song song : songs) {
+            if (song.getTitle().startsWith("pop")) {
+                popSongs.add(song.getTitle());
+            } else if (song.getTitle().startsWith("metal")) {
+                metalSongs.add(song.getTitle());
+            }
+        }
+
+        if (!popSongs.isEmpty()) {
+            groupList.add("Pop");
+            songMap.put("Pop", popSongs);
+        }
+
+        if (!metalSongs.isEmpty()) {
+            groupList.add("Metal");
+            songMap.put("Metal", metalSongs);
+        }
+
+        adapter.notifyDataSetChanged(); // 更新列表显示
     }
 
     @Override
@@ -140,6 +209,17 @@ public class MusicFragment extends Fragment implements View.OnClickListener {
         if (mainActivity.getMusicService() != null) {
             sb.setMax(mainActivity.getMusicService().getDuration());
             tvTotal.setText(formatTime(mainActivity.getMusicService().getDuration()));
+
+            // 获取当前歌曲并设置 iv_music 的图片
+            int currentId = mainActivity.getMusicService().getCurrentSongResId();
+            MusicService.Song currentSong = mainActivity.getMusicService().getSongList().get(currentId);
+
+            // 检查图片资源 ID 是否有效
+            if (currentSong.getImageResId() != 0) {
+                ivMusic.setImageResource(currentSong.getImageResId());  // 设置图片
+            } else {
+                ivMusic.setImageResource(R.drawable.default_music_image);  // 若无对应图片，设置默认图片
+            }
         }
     }
 

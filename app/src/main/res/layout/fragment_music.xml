@@ -4,7 +4,8 @@
     android:gravity="center"
     android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:layout_margin="40dp">
 
     <ImageView
         android:id="@+id/iv_music"
@@ -12,7 +13,7 @@
         android:layout_height="240dp"
         android:layout_gravity="center_horizontal"
         android:layout_margin="15dp"
-        android:src="@drawable/music1" />
+        android:src="@drawable/default_music_image" />
 
     <TextView
         android:id="@+id/song_name"
@@ -79,5 +80,12 @@
             android:background="@drawable/music_selector"
             android:text="@string/music_next" />
     </LinearLayout>
+    <ExpandableListView
+        android:id="@+id/expandable_music_list"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_margin="20dp"/>
+
 
 </LinearLayout>

@@ -9,6 +9,8 @@ import android.util.Log;
 import android.content.Context;
 import android.content.res.Resources;
 import android.net.Uri;
+
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
@@ -45,21 +47,68 @@ public class MusicService extends Service {
             String resourceName = field.getName();
             Uri songUri = Uri.parse("android.resource://" + getPackageName() + "/raw/" + resourceName);
             int resId = getResources().getIdentifier(resourceName, "raw", getPackageName());
-            try{
-                 tmpMP = MediaPlayer.create(this,resId);
-            }catch (Exception e){
-                continue;       // @TODO 未设置对异常的处理，不安全
+
+            // 获取对应图片的资源 ID
+            int imageResId = getResources().getIdentifier(resourceName, "drawable", getPackageName());
+
+            try {
+                tmpMP = MediaPlayer.create(this, resId);
+            } catch (Exception e) {
+                continue;
             }
-            Song newSong = new Song(resourceName, songUri);
+
+            Song newSong = new Song(resourceName, songUri, imageResId);  // 传入图片资源 ID
             songList.add(newSong);
             tmpMP.release();
             Log.d(TAG, "Added song: " + resourceName);
         }
     }
 
+
     private void notifySongChanged() {
         Intent intent = new Intent("com.example.mindalert.SONG_CHANGED");
         sendBroadcast(intent);
+    }
+
+    // 根据歌曲标题获取歌曲索引
+    public int getSongIndexByTitle(String title) {
+        for (int i = 0; i < songList.size(); i++) {
+            if (songList.get(i).getTitle().equals(title)) {
+                return i;
+            }
+        }
+        return -1; // 未找到
+    }
+
+    // 播放指定索引的歌曲
+    public void playSongAtIndex(int songIndex) {
+        if (songIndex < 0 || songIndex >= songList.size()) {
+            Log.e("MusicService", "Invalid song index");
+            return;
+        }
+
+        Song song = songList.get(songIndex);
+        currentSongIndex = songIndex;
+
+        // 停止当前播放的音乐（如果有的话）
+        if (mediaPlayer.isPlaying()) {
+            mediaPlayer.stop();
+        }
+
+        mediaPlayer.reset(); // 重置 MediaPlayer 以准备播放新歌曲
+
+        try {
+            // 设置数据源为指定的歌曲文件
+            mediaPlayer.setDataSource(song.getUri().toString());
+            mediaPlayer.prepare(); // 准备播放（同步）
+            mediaPlayer.start();   // 开始播放
+
+            // 通知 UI 更新当前播放的歌曲信息
+            Log.d("MusicService", "Playing song: " + song.getTitle());
+
+        } catch (IOException e) {
+            Log.e("MusicService", "Error playing song: " + e.getMessage());
+        }
     }
 
     private void setupMediaPlayer() {
@@ -162,11 +211,13 @@ public class MusicService extends Service {
         private String title;
         private Uri uri;
         private int index;
+        private int imageResId;  // 新增字段，保存图片资源 ID
 
-        public Song(String title, Uri uri) {
+        public Song(String title, Uri uri, int imageResId) {
             this.title = title;
             this.uri = uri;
             this.index = ++songIndex;
+            this.imageResId = imageResId;  // 初始化图片资源 ID
         }
 
         public String getTitle() {
@@ -180,5 +231,12 @@ public class MusicService extends Service {
         public int getIndex() {
             return index;
         }
+
+        public int getImageResId() {
+            return imageResId;  // 返回图片资源 ID
+        }
+
+
     }
+
 }

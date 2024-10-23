@@ -69,21 +69,21 @@ public class AnalyzeService extends Service {
             int wake = 0;
 
              //读取文件中的数据
-//                while ((line = reader.readLine()) != null) {
-//                    if (line.startsWith("fatigue:")) {
-//                        fatigue = Integer.parseInt(line.replace("fatigue:", "").trim());
-//                    } else if (line.startsWith("wake:")) {
-//                        wake = Integer.parseInt(line.replace("wake:", "").trim());
-//                    }
-//                }
-
-            //读取文件中的数据
-            int k = getReadLine();
-            for(int i = 0; i < k && (line = reader.readLine()) != null; ++i){
-                wake = Integer.parseInt(line.replace("wake:", "").trim());
-                line = reader.readLine();
-                fatigue = Integer.parseInt(line.replace("fatigue:", "").trim());
-            }
+                while ((line = reader.readLine()) != null) {
+                    if (line.startsWith("wake:")) {
+                        wake = Integer.parseInt(line.replace("wake:", "").trim());
+                    } else if (line.startsWith("fatigue:")) {
+                        fatigue = Integer.parseInt(line.replace("fatigue:", "").trim());
+                    }
+                }
+//
+//            //读取文件中的数据
+//            int k = getReadLine();
+//            for(int i = 0; i < k && (line = reader.readLine()) != null; ++i){
+//                wake = Integer.parseInt(line.replace("wake:", "").trim());
+//                line = reader.readLine();
+//                fatigue = Integer.parseInt(line.replace("fatigue:", "").trim());
+//            }
             fatigueEntries.add(new Entry(getReadLine(), fatigue));
             wakeEntries.add(new Entry(getReadLine(), wake));
 
@@ -92,7 +92,7 @@ public class AnalyzeService extends Service {
                 fatigueEntries = fatigueEntries.subList(fatigueEntries.size() - 8, fatigueEntries.size());
                 wakeEntries = wakeEntries.subList(wakeEntries.size() - 8, wakeEntries.size());
             }
-            setReadLine(k + 1);
+            //setReadLine(k + 1);
             reader.close();
 
         } catch (IOException e) {
