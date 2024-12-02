@@ -1,14 +1,11 @@
-package com.example.mindalert;
+package com.example.mindalert.music;
 
 import android.animation.ObjectAnimator;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.IBinder;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -24,7 +21,9 @@ import android.content.BroadcastReceiver;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
+
+import com.example.mindalert.MainActivity;
+import com.example.mindalert.R;
 
 import java.util.ArrayList;
 import java.util.HashMap;

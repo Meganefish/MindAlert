@@ -15,7 +15,7 @@
 
         <!-- 注册 MusicService -->
         <service
-            android:name=".MusicService"
+            android:name=".music.MusicService"
             android:enabled="true"
             android:exported="false">
             <intent-filter>
@@ -23,7 +23,7 @@
             </intent-filter>
         </service>
         <service
-            android:name=".AnalyzeService"
+            android:name=".analyze.AnalyzeService"
             android:enabled="true"
             android:exported="false">
         </service>

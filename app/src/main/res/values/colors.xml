@@ -12,4 +12,16 @@
     <color name="axis_title_color">#333333</color>
     <color name="axis_line_color">#CCCCCC</color>
 
+
+    <color name="alphaColor">#FF0000</color>  <!-- Alpha 用红色表示 -->
+    <color name="alphaValueColor">#FF0000</color>  <!-- Alpha 数据值文本颜色 -->
+
+    <color name="betaColor">#00FF00</color>  <!-- Beta 用绿色表示 -->
+    <color name="betaValueColor">#00FF00</color>  <!-- Beta 数据值文本颜色 -->
+
+    <color name="gammaColor">#0000FF</color>  <!-- Gamma 用蓝色表示 -->
+    <color name="gammaValueColor">#0000FF</color>  <!-- Gamma 数据值文本颜色 -->
+
+    <color name="thetaColor">#FFFF00</color>  <!-- Theta 用黄色表示 -->
+    <color name="thetaValueColor">#FFFF00</color>  <!-- Theta 数据值文本颜色 -->
 </resources>

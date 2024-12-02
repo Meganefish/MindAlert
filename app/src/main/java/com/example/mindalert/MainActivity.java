@@ -5,9 +5,7 @@ import android.content.ComponentName;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.IBinder;
-import android.os.Looper;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
@@ -22,23 +20,25 @@ import androidx.appcompat.app.AppCompatDelegate;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
 
-import com.github.mikephil.charting.data.Entry;
+import com.example.mindalert.analyze.AnalyzeFragment;
+import com.example.mindalert.analyze.AnalyzeService;
+import com.example.mindalert.music.MusicFragment;
+import com.example.mindalert.music.MusicService;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 public class MainActivity extends AppCompatActivity {
     private final static String TAG = "MainActivity";
     private Button btnAnalyze, btnMap, btnMusic, btnOptions;
-    private FloatingActionButton fabConnect;
+    //private FloatingActionButton fabConnect;
     private static Context context;
-    private float dX, dY; // 初始坐标偏移量
-    private float initialX, initialY; // 初始位置
-    private static final int CLICK_THRESHOLD = 100; // 点击的阈值
+    //private float dX, dY; // 初始坐标偏移量
+    //private float initialX, initialY; // 初始位置
+    //private static final int CLICK_THRESHOLD = 100; // 点击的阈值
     private AnalyzeService analyzeService;
     private MusicService musicService;
-    private boolean isDataRead = false;
+    //private boolean isDataRead = false;
+    private Intent analyzeIntent;
     private boolean isAnalyzeServiceBound = false;
     private boolean isMusicServiceBound = false;
 
@@ -94,10 +94,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         context = this;
-        //@TODO 创建MapService，开启定位功能后，在后台执行
-
-        //@TODO 创建AnalyzeService，数据读取存储在后台执行，图表在前台绘制
-        Intent analyzeIntent = new Intent(this, AnalyzeService.class);
+        analyzeIntent = new Intent(this, AnalyzeService.class);
         boolean analyzeServiceBound = this.bindService(analyzeIntent, analyzeServiceConnection, Context.BIND_AUTO_CREATE);
         if (!analyzeServiceBound) {
             Log.e(TAG, "Failed to bind AnalyzeService");  // 检查服务绑定是否成功
@@ -115,7 +112,7 @@ public class MainActivity extends AppCompatActivity {
         btnMap = findViewById(R.id.btn_map);
         btnMusic = findViewById(R.id.btn_music);
         btnOptions = findViewById(R.id.btn_options);
-        fabConnect = findViewById(R.id.fab_connect);
+        //fabConnect = findViewById(R.id.fab_connect);
 
         // 设置按钮点击事件
         btnAnalyze.setOnClickListener(v -> replaceFragment(new AnalyzeFragment()));
@@ -123,48 +120,48 @@ public class MainActivity extends AppCompatActivity {
         btnMusic.setOnClickListener(v -> replaceFragment(new MusicFragment()));
         btnOptions.setOnClickListener(v -> replaceFragment(new OptionsFragment()));
 
-        fabConnect.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View view, MotionEvent event) {
-                switch (event.getAction()){
-                    case MotionEvent.ACTION_DOWN:
-                        dX = view.getX() - event.getRawX();
-                        dY = view.getY() - event.getRawY();
-                        initialX = event.getRawX();
-                        initialY = event.getRawY();
-                        Log.d(TAG,"Fab downed");
-                        break;
-                    case MotionEvent.ACTION_MOVE:
-                        view.animate()
-                                .x(event.getRawX() + dX)
-                                .y(event.getRawY() + dY)
-                                .setDuration(0)
-                                .start();
-
-                        Log.d(TAG,"Fab moved");
-                    case MotionEvent.ACTION_UP:
-                        float finalX = event.getRawX();
-                        float finalY = event.getRawY();
-                        if (Math.abs(finalX - initialX) < CLICK_THRESHOLD && Math.abs(finalY - initialY) < CLICK_THRESHOLD) {
-                            // 如果拖动距离在阈值内，视为点击
-                            Log.d(TAG,"Fab clicked");
-                            view.performClick(); // 调用View的点击方法
-                        }
-                        break;
-                    default:
-                        return false;
-                }
-                return true;
-            }
-        });
-        fabConnect.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(!isDataRead)
-                    analyzeService.startReadingData();
-                isDataRead = true;
-            }
-        });
+//        fabConnect.setOnTouchListener(new View.OnTouchListener() {
+//            @Override
+//            public boolean onTouch(View view, MotionEvent event) {
+//                switch (event.getAction()){
+//                    case MotionEvent.ACTION_DOWN:
+//                        dX = view.getX() - event.getRawX();
+//                        dY = view.getY() - event.getRawY();
+//                        initialX = event.getRawX();
+//                        initialY = event.getRawY();
+//                        Log.d(TAG,"Fab downed");
+//                        break;
+//                    case MotionEvent.ACTION_MOVE:
+//                        view.animate()
+//                                .x(event.getRawX() + dX)
+//                                .y(event.getRawY() + dY)
+//                                .setDuration(0)
+//                                .start();
+//
+//                        Log.d(TAG,"Fab moved");
+//                    case MotionEvent.ACTION_UP:
+//                        float finalX = event.getRawX();
+//                        float finalY = event.getRawY();
+//                        if (Math.abs(finalX - initialX) < CLICK_THRESHOLD && Math.abs(finalY - initialY) < CLICK_THRESHOLD) {
+//                            // 如果拖动距离在阈值内，视为点击
+//                            Log.d(TAG,"Fab clicked");
+//                            view.performClick(); // 调用View的点击方法
+//                        }
+//                        break;
+//                    default:
+//                        return false;
+//                }
+//                return true;
+//            }
+//        });
+//        fabConnect.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                if(!isDataRead)
+//                    analyzeService.startReadingData();
+//                isDataRead = true;
+//            }
+//        });
         // 默认显示 AnalyzeFragment
         replaceFragment(new AnalyzeFragment());
     }
@@ -203,12 +200,10 @@ public class MainActivity extends AppCompatActivity {
     public AnalyzeService getAnalyzeService(){
         return this.analyzeService;
     }
+    public Intent getAnalyzeIntent(){ return this.analyzeIntent; }
     public MusicService getMusicService() {return this.musicService; }
     public boolean getIsMusicServiceBound(){
         return this.isMusicServiceBound;
-    }
-    public boolean getIsDataRead(){
-        return this.isDataRead;
     }
 
     // 提供一个方法获取LiveData

@@ -1,4 +1,6 @@
-package com.example.mindalert;
+package com.example.mindalert.analyze;
+
+import static androidx.constraintlayout.helper.widget.MotionEffect.TAG;
 
 import android.content.BroadcastReceiver;
 import android.content.IntentFilter;
@@ -13,15 +15,23 @@ import android.widget.TextView;
 import android.widget.ImageView;
 
 import androidx.fragment.app.Fragment;
+import androidx.viewpager2.widget.ViewPager2;
 
 import android.content.Context;
 import android.content.Intent;
 
 import android.os.Handler;
+
+import com.example.mindalert.MainActivity;
+import com.example.mindalert.R;
 import com.github.mikephil.charting.charts.LineChart;
+import com.github.mikephil.charting.components.XAxis;
+import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
+import com.google.android.material.tabs.TabLayout;
+import com.google.android.material.tabs.TabLayoutMediator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,15 +39,14 @@ import java.util.List;
 
 public class AnalyzeFragment extends Fragment {
     private View view;
-    private static int height = 0;
+    private TabLayout tabLayout;
+    private ViewPager2 viewPager;
     private MainActivity mainActivity;
-    private final static String TAG = "AnalyseFragment";
+    private Button btnConnect;
+    private boolean isReading = false;  // 用于判断文件读取是否进行中
     private ImageView playPauseButton;
     private ImageView nextButton;
     private TextView nowPlayingText;
-    private View fatigueBar, wakeBar;
-    private TextView state;
-    private LineChart lineChart;
     private Handler analyzeHandler = new Handler();
     private Runnable updateAnalyzeTask;
     private BroadcastReceiver songChangedReceiver = new BroadcastReceiver() {
@@ -57,26 +66,45 @@ public class AnalyzeFragment extends Fragment {
         view = inflater.inflate(R.layout.fragment_analyze, container, false);
         mainActivity = (MainActivity) getActivity();
         super.onViewCreated(view, savedInstanceState);
-        // 初始化 LineChart
-        lineChart = view.findViewById(R.id.lineChart);
-        lineChart.getDescription().setEnabled(false);  // 禁用描述文本
-        lineChart.setTouchEnabled(true);  // 启用手势
-        lineChart.setPinchZoom(true);  // 启用缩放
 
-        lineChart.getXAxis().setEnabled(false);
-        lineChart.getAxisLeft().setEnabled(true);
-        lineChart.getAxisLeft().setAxisMaximum(100);
-        lineChart.getAxisLeft().setAxisMinimum(0);
-        lineChart.getAxisRight().setEnabled(false);
-        lineChart.invalidate();  // 刷新图表
+        tabLayout = view.findViewById(R.id.tabLayout);
+        viewPager = view.findViewById(R.id.viewPager);
 
-        fatigueBar = view.findViewById(R.id.fatigue_bar);
-        wakeBar = view.findViewById(R.id.wake_bar);
-        state = view.findViewById(R.id.tv_state);
+        // 创建 Tab 标题列表
+        List<String> titles = new ArrayList<>();
+        titles.add("Raw data");
+        titles.add("Wave");
+        titles.add("Perclos");
+
+        // 创建适配器并设置给 ViewPager
+        ViewPagerAdapter adapter = new ViewPagerAdapter(mainActivity, titles);
+        viewPager.setAdapter(adapter);
+
+        // 将 TabLayout 和 ViewPager 关联起来
+        new TabLayoutMediator(tabLayout, viewPager, (tab, position) -> {
+            tab.setText(titles.get(position));
+        }).attach();
+
+        btnConnect = view.findViewById(R.id.btn_connect);
 
         playPauseButton = view.findViewById(R.id.analyze_play_pause);
         nextButton = view.findViewById(R.id.analyze_next);
         nowPlayingText = view.findViewById(R.id.now_playing);
+
+        btnConnect.setOnClickListener(v -> {
+            if (isReading) {
+                // 暂停文件读取
+                getActivity().stopService(((MainActivity) getActivity()).getAnalyzeIntent());
+                btnConnect.setText("Connect");
+            } else {
+                // 启动文件读取
+                getActivity().startService(((MainActivity) getActivity()).getAnalyzeIntent());
+                btnConnect.setText("Disconnect");
+            }
+
+            // 切换读取状态
+            isReading = !isReading;
+        });
 
         playPauseButton.setOnClickListener(v -> {
             if (mainActivity.getIsMusicServiceBound()) {
@@ -96,18 +124,16 @@ public class AnalyzeFragment extends Fragment {
                 updateUI();
             }
         });
-        updateAnalyzeTask = new Runnable() {
-            @Override
-            public void run() {
-                if(mainActivity.getIsDataRead()){
-                    updateLineChart();
-                    updateBar();
-                    updateState();
-                }
-                analyzeHandler.postDelayed(this,1000);
-            }
-        };
-        analyzeHandler.post(updateAnalyzeTask);
+//        updateAnalyzeTask = new Runnable() {
+//            @Override
+//            public void run() {
+//                if(mainActivity.getIsDataRead()){
+//                    updateLineChart();
+//                }
+//                analyzeHandler.postDelayed(this,1000);
+//            }
+//        };
+//        analyzeHandler.post(updateAnalyzeTask);
         updateUI();
         return view;
     }
@@ -121,7 +147,7 @@ public class AnalyzeFragment extends Fragment {
     }
 
     @Override
-    public void onResume(){
+    public void onResume() {
         super.onResume();
         updateUI();
     }
@@ -153,70 +179,9 @@ public class AnalyzeFragment extends Fragment {
             nowPlaying = mainActivity.getMusicService().getSongList().get(mainActivity.getMusicService().getCurrentSongResId()).getTitle();
             formattedText = String.format(getString(R.string.now_playing), nowPlaying);  // 格式化文本
             nowPlayingText.setText(formattedText);
-        }else{
+        } else {
             formattedText = String.format(getString(R.string.now_playing), "");  // 格式化文本
             nowPlayingText.setText(formattedText);
         }
-    }
-
-    private void updateBar() {
-        int index = mainActivity.getAnalyzeService().fatigueEntries.size() - 1;
-        float fatigue = mainActivity.getAnalyzeService().fatigueEntries.get(index).getY();
-        float wake = mainActivity.getAnalyzeService().wakeEntries.get(index).getY();
-
-        if(height == 0)
-            height = view.findViewById(R.id.fatigue_layout).getHeight();
-
-        ViewGroup.LayoutParams fatigueParams = fatigueBar.getLayoutParams();
-        fatigueParams.height = (int) (height * (fatigue / 100.0) * 0.7) + 5;
-        fatigueBar.setLayoutParams(fatigueParams);
-
-        ViewGroup.LayoutParams wakeParams = wakeBar.getLayoutParams();
-        wakeParams.height = (int) (height * (wake / 100.0) * 0.7) + 5;
-        wakeBar.setLayoutParams(wakeParams);
-    }
-
-    private void updateState() {
-        int index = mainActivity.getAnalyzeService().fatigueEntries.size() - 1;
-        float fatigue = mainActivity.getAnalyzeService().fatigueEntries.get(index).getY();
-        float wake = mainActivity.getAnalyzeService().wakeEntries.get(index).getY();
-        String formattedText;
-        if (fatigue > wake) {
-            formattedText = String.format(getString(R.string.state), getString(R.string.state_fatigue));  // 格式化文本
-            state.setText(formattedText);
-        } else {
-            formattedText = String.format(getString(R.string.state), getString(R.string.state_wake));  // 格式化文本
-            state.setText(formattedText);
-        }
-    }
-
-    private void updateLineChart() {
-        MainActivity mainActivity = (MainActivity) getActivity();
-        if (mainActivity.getAnalyzeService() == null) {
-            Log.e(TAG, "AnalyzeService is not bound yet, cannot update line chart.");
-            return;  // 避免空指针异常
-        }
-
-        LineDataSet fatigueDataSet = new LineDataSet(mainActivity.getAnalyzeService().fatigueEntries, getString(R.string.fatigue));
-        fatigueDataSet.setColor(Color.RED);
-        fatigueDataSet.setLineWidth(2f);
-        fatigueDataSet.setCircleColor(Color.RED);
-        fatigueDataSet.setCircleRadius(3f);
-
-        LineDataSet wakeDataSet = new LineDataSet(mainActivity.getAnalyzeService().wakeEntries, getString(R.string.wake));
-        wakeDataSet.setColor(Color.GREEN);
-        wakeDataSet.setLineWidth(2f);
-        wakeDataSet.setCircleColor(Color.GREEN);
-        wakeDataSet.setCircleRadius(3f);
-
-        List<ILineDataSet> dataSets = new ArrayList<>();
-        dataSets.add(fatigueDataSet);
-        dataSets.add(wakeDataSet);
-
-        LineData data = new LineData(dataSets);
-
-
-        lineChart.setData(data);
-        lineChart.invalidate();  // 刷新图表
     }
 }

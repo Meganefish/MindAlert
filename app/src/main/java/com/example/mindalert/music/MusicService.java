@@ -1,17 +1,29 @@
-package com.example.mindalert;
+package com.example.mindalert.music;
 
+import android.annotation.SuppressLint;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.media.MediaPlayer;
+import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
-import android.content.Context;
-import android.content.res.Resources;
 import android.net.Uri;
 
+import com.example.mindalert.R;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.lang.reflect.Field;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,6 +45,7 @@ public class MusicService extends Service {
     public void onCreate() {
         super.onCreate();
         Log.d(TAG, "Service created");
+        //fetchSongListFromServer();
         initializeSongList();
         setupMediaPlayer();
     }
@@ -40,7 +53,7 @@ public class MusicService extends Service {
     private void initializeSongList() {
         MediaPlayer tmpMP;
         Context context = getApplicationContext();
-        Resources resources = context.getResources();
+        Resources resources = ((Context) context).getResources();
         Field[] fields = R.raw.class.getFields();
 
         for (Field field : fields) {
@@ -63,6 +76,65 @@ public class MusicService extends Service {
             Log.d(TAG, "Added song: " + resourceName);
         }
     }
+
+//    @SuppressLint("StaticFieldLeak")
+//    private void fetchSongListFromServer() {
+//        // 通过 WordPress API 获取文件列表
+//        String urlString = "https://113.44.58.92/wp-json/wp/v2/media?per_page=100&mime_type=audio/mpeg";  // 假设您有一个返回音频文件的 API
+//
+//        // 使用 HttpURLConnection 请求
+//        new AsyncTask<Void, Void, List<String>>() {
+//            @Override
+//            protected List<String> doInBackground(Void... voids) {
+//                List<String> songNames = new ArrayList<>();
+//                try {
+//                    URL url = new URL(urlString);
+//                    HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+//                    connection.setRequestMethod("GET");
+//                    connection.setConnectTimeout(5000);
+//                    connection.setReadTimeout(5000);
+//                    connection.connect();
+//
+//                    InputStream inputStream = connection.getInputStream();
+//                    BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+//                    StringBuilder response = new StringBuilder();
+//                    String line;
+//                    while ((line = reader.readLine()) != null) {
+//                        response.append(line);
+//                    }
+//
+//                    // 假设响应为 JSON 格式，解析文件名
+//                    JSONArray jsonArray = new JSONArray(response.toString());
+//                    for (int i = 0; i < jsonArray.length(); i++) {
+//                        JSONObject file = jsonArray.getJSONObject(i);
+//                        String fileName = file.getString("slug");  // 获取文件名
+//                        songNames.add(fileName);
+//                    }
+//                } catch (Exception e) {
+//                    e.printStackTrace();
+//                }
+//                return songNames;
+//            }
+//
+//            @Override
+//            protected void onPostExecute(List<String> songNames) {
+//                super.onPostExecute(songNames);
+//                // 使用获取到的文件名构建歌曲列表
+//                initializeSongList(songNames);
+//            }
+//        }.execute();
+//    }
+//
+//    private void initializeSongList(List<String> songNames) {
+//        for (String songName : songNames) {
+//            Uri songUri = Uri.parse("http://113.44.58.92/wp-content/uploads/2024/11/" + songName);
+//            int imageResId = R.drawable.default_music_image;  // 默认封面图
+//            Song newSong = new Song(songName, songUri, imageResId);
+//            songList.add(newSong);
+//            Log.d(TAG, "添加了歌曲: " + songName);
+//        }
+//    }
+
 
 
     private void notifySongChanged() {

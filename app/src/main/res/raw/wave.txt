@@ -1,0 +1,600 @@
+Delta: 1938
+Theta: 11
+Alpha: 41
+Beta: 62
+Gamma: 92
+
+Delta: 1803
+Theta: 47
+Alpha: 58
+Beta: 5
+Gamma: 38
+
+Delta: 1140
+Theta: 88
+Alpha: 88
+Beta: 75
+Gamma: 2
+
+Delta: 460
+Theta: 24
+Alpha: 47
+Beta: 24
+Gamma: 30
+
+Delta: 629
+Theta: 69
+Alpha: 4
+Beta: 43
+Gamma: 19
+
+Delta: 1493
+Theta: 45
+Alpha: 33
+Beta: 46
+Gamma: 49
+
+Delta: 531
+Theta: 70
+Alpha: 97
+Beta: 86
+Gamma: 74
+
+Delta: 1052
+Theta: 14
+Alpha: 11
+Beta: 54
+Gamma: 34
+
+Delta: 1765
+Theta: 83
+Alpha: 93
+Beta: 61
+Gamma: 69
+
+Delta: 1513
+Theta: 5
+Alpha: 59
+Beta: 42
+Gamma: 65
+
+Delta: 1857
+Theta: 39
+Alpha: 31
+Beta: 82
+Gamma: 16
+
+Delta: 1971
+Theta: 19
+Alpha: 13
+Beta: 63
+Gamma: 2
+
+Delta: 1323
+Theta: 24
+Alpha: 4
+Beta: 37
+Gamma: 45
+
+Delta: 1270
+Theta: 54
+Alpha: 99
+Beta: 97
+Gamma: 47
+
+Delta: 1165
+Theta: 69
+Alpha: 27
+Beta: 87
+Gamma: 98
+
+Delta: 860
+Theta: 4
+Alpha: 19
+Beta: 29
+Gamma: 18
+
+Delta: 894
+Theta: 74
+Alpha: 44
+Beta: 75
+Gamma: 68
+
+Delta: 130
+Theta: 66
+Alpha: 3
+Beta: 93
+Gamma: 28
+
+Delta: 103
+Theta: 28
+Alpha: 91
+Beta: 73
+Gamma: 56
+
+Delta: 1065
+Theta: 82
+Alpha: 46
+Beta: 9
+Gamma: 99
+
+Delta: 1775
+Theta: 35
+Alpha: 67
+Beta: 33
+Gamma: 46
+
+Delta: 1433
+Theta: 4
+Alpha: 88
+Beta: 54
+Gamma: 62
+
+Delta: 939
+Theta: 65
+Alpha: 76
+Beta: 96
+Gamma: 77
+
+Delta: 614
+Theta: 80
+Alpha: 49
+Beta: 63
+Gamma: 81
+
+Delta: 576
+Theta: 62
+Alpha: 92
+Beta: 46
+Gamma: 69
+
+Delta: 619
+Theta: 99
+Alpha: 91
+Beta: 98
+Gamma: 95
+
+Delta: 1630
+Theta: 48
+Alpha: 1
+Beta: 51
+Gamma: 100
+
+Delta: 1792
+Theta: 70
+Alpha: 59
+Beta: 46
+Gamma: 97
+
+Delta: 1947
+Theta: 6
+Alpha: 12
+Beta: 93
+Gamma: 79
+
+Delta: 925
+Theta: 55
+Alpha: 32
+Beta: 17
+Gamma: 4
+
+Delta: 642
+Theta: 98
+Alpha: 9
+Beta: 69
+Gamma: 97
+
+Delta: 379
+Theta: 94
+Alpha: 43
+Beta: 96
+Gamma: 10
+
+Delta: 837
+Theta: 5
+Alpha: 87
+Beta: 99
+Gamma: 40
+
+Delta: 72
+Theta: 30
+Alpha: 70
+Beta: 89
+Gamma: 27
+
+Delta: 1991
+Theta: 22
+Alpha: 24
+Beta: 7
+Gamma: 67
+
+Delta: 1998
+Theta: 92
+Alpha: 14
+Beta: 9
+Gamma: 49
+
+Delta: 1446
+Theta: 34
+Alpha: 25
+Beta: 97
+Gamma: 97
+
+Delta: 1100
+Theta: 83
+Alpha: 96
+Beta: 56
+Gamma: 94
+
+Delta: 1958
+Theta: 86
+Alpha: 8
+Beta: 62
+Gamma: 64
+
+Delta: 1337
+Theta: 19
+Alpha: 18
+Beta: 83
+Gamma: 68
+
+Delta: 1238
+Theta: 42
+Alpha: 65
+Beta: 100
+Gamma: 67
+
+Delta: 828
+Theta: 1
+Alpha: 3
+Beta: 41
+Gamma: 91
+
+Delta: 1433
+Theta: 90
+Alpha: 20
+Beta: 84
+Gamma: 35
+
+Delta: 471
+Theta: 10
+Alpha: 44
+Beta: 58
+Gamma: 70
+
+Delta: 707
+Theta: 57
+Alpha: 25
+Beta: 13
+Gamma: 31
+
+Delta: 1317
+Theta: 15
+Alpha: 44
+Beta: 98
+Gamma: 73
+
+Delta: 891
+Theta: 53
+Alpha: 84
+Beta: 92
+Gamma: 55
+
+Delta: 51
+Theta: 7
+Alpha: 95
+Beta: 21
+Gamma: 49
+
+Delta: 1994
+Theta: 42
+Alpha: 6
+Beta: 85
+Gamma: 38
+
+Delta: 1805
+Theta: 34
+Alpha: 16
+Beta: 25
+Gamma: 95
+
+Delta: 127
+Theta: 78
+Alpha: 85
+Beta: 70
+Gamma: 66
+
+Delta: 1056
+Theta: 61
+Alpha: 31
+Beta: 95
+Gamma: 9
+
+Delta: 1792
+Theta: 89
+Alpha: 73
+Beta: 79
+Gamma: 29
+
+Delta: 1770
+Theta: 4
+Alpha: 25
+Beta: 4
+Gamma: 82
+
+Delta: 810
+Theta: 29
+Alpha: 56
+Beta: 99
+Gamma: 59
+
+Delta: 1176
+Theta: 59
+Alpha: 83
+Beta: 92
+Gamma: 46
+
+Delta: 1678
+Theta: 73
+Alpha: 46
+Beta: 29
+Gamma: 45
+
+Delta: 1059
+Theta: 50
+Alpha: 85
+Beta: 18
+Gamma: 53
+
+Delta: 234
+Theta: 31
+Alpha: 10
+Beta: 8
+Gamma: 24
+
+Delta: 970
+Theta: 19
+Alpha: 25
+Beta: 60
+Gamma: 0
+
+Delta: 1502
+Theta: 48
+Alpha: 96
+Beta: 57
+Gamma: 41
+
+Delta: 269
+Theta: 100
+Alpha: 59
+Beta: 86
+Gamma: 20
+
+Delta: 296
+Theta: 68
+Alpha: 75
+Beta: 93
+Gamma: 84
+
+Delta: 895
+Theta: 16
+Alpha: 26
+Beta: 14
+Gamma: 96
+
+Delta: 268
+Theta: 29
+Alpha: 21
+Beta: 51
+Gamma: 90
+
+Delta: 1801
+Theta: 74
+Alpha: 66
+Beta: 19
+Gamma: 27
+
+Delta: 1331
+Theta: 15
+Alpha: 44
+Beta: 92
+Gamma: 13
+
+Delta: 852
+Theta: 40
+Alpha: 99
+Beta: 41
+Gamma: 9
+
+Delta: 108
+Theta: 91
+Alpha: 93
+Beta: 95
+Gamma: 6
+
+Delta: 1003
+Theta: 54
+Alpha: 54
+Beta: 37
+Gamma: 4
+
+Delta: 868
+Theta: 43
+Alpha: 11
+Beta: 39
+Gamma: 85
+
+Delta: 576
+Theta: 74
+Alpha: 32
+Beta: 15
+Gamma: 62
+
+Delta: 1551
+Theta: 32
+Alpha: 21
+Beta: 28
+Gamma: 98
+
+Delta: 1638
+Theta: 76
+Alpha: 25
+Beta: 18
+Gamma: 6
+
+Delta: 911
+Theta: 56
+Alpha: 18
+Beta: 13
+Gamma: 7
+
+Delta: 1282
+Theta: 1
+Alpha: 53
+Beta: 45
+Gamma: 65
+
+Delta: 1418
+Theta: 40
+Alpha: 12
+Beta: 3
+Gamma: 20
+
+Delta: 1259
+Theta: 67
+Alpha: 1
+Beta: 55
+Gamma: 41
+
+Delta: 292
+Theta: 31
+Alpha: 82
+Beta: 74
+Gamma: 16
+
+Delta: 895
+Theta: 82
+Alpha: 12
+Beta: 37
+Gamma: 40
+
+Delta: 341
+Theta: 80
+Alpha: 48
+Beta: 23
+Gamma: 7
+
+Delta: 537
+Theta: 3
+Alpha: 78
+Beta: 60
+Gamma: 65
+
+Delta: 1749
+Theta: 70
+Alpha: 15
+Beta: 96
+Gamma: 74
+
+Delta: 12
+Theta: 74
+Alpha: 19
+Beta: 31
+Gamma: 81
+
+Delta: 1427
+Theta: 48
+Alpha: 71
+Beta: 82
+Gamma: 7
+
+Delta: 367
+Theta: 35
+Alpha: 68
+Beta: 43
+Gamma: 22
+
+Delta: 228
+Theta: 80
+Alpha: 78
+Beta: 98
+Gamma: 79
+
+Delta: 1431
+Theta: 30
+Alpha: 93
+Beta: 71
+Gamma: 58
+
+Delta: 583
+Theta: 95
+Alpha: 48
+Beta: 96
+Gamma: 34
+
+Delta: 256
+Theta: 90
+Alpha: 3
+Beta: 28
+Gamma: 96
+
+Delta: 341
+Theta: 35
+Alpha: 70
+Beta: 64
+Gamma: 16
+
+Delta: 914
+Theta: 82
+Alpha: 41
+Beta: 45
+Gamma: 22
+
+Delta: 827
+Theta: 59
+Alpha: 79
+Beta: 20
+Gamma: 84
+
+Delta: 622
+Theta: 27
+Alpha: 31
+Beta: 2
+Gamma: 14
+
+Delta: 725
+Theta: 13
+Alpha: 27
+Beta: 76
+Gamma: 79
+
+Delta: 725
+Theta: 67
+Alpha: 70
+Beta: 50
+Gamma: 87
+
+Delta: 1261
+Theta: 90
+Alpha: 98
+Beta: 71
+Gamma: 15
+
+Delta: 480
+Theta: 6
+Alpha: 86
+Beta: 61
+Gamma: 89
+
+Delta: 1207
+Theta: 56
+Alpha: 29
+Beta: 56
+Gamma: 21
+
+Delta: 1907
+Theta: 55
+Alpha: 30
+Beta: 78
+Gamma: 37
+

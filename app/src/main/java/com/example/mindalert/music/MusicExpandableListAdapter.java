@@ -1,4 +1,4 @@
-package com.example.mindalert;
+package com.example.mindalert.music;
 
 import android.content.Context;
 import android.view.LayoutInflater;
