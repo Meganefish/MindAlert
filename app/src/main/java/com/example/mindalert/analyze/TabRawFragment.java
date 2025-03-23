@@ -10,6 +10,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.example.mindalert.MainActivity;
 import com.example.mindalert.R;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.data.Entry;
@@ -23,6 +24,9 @@ public class TabRawFragment extends Fragment {
 
     private static final String ARG_TITLE = "title";
     private static final String ARG_CHART_ID = "chart_id";
+    private LineChart lineChart;
+    private TextView tvTable;
+    private ArrayList<Integer> raw = new ArrayList<>();
 
     public static TabRawFragment newInstance(String title, int chartId) {
         TabRawFragment fragment = new TabRawFragment();
@@ -41,32 +45,73 @@ public class TabRawFragment extends Fragment {
         // 获取传递过来的参数
         assert getArguments() != null;
         String title = getArguments().getString(ARG_TITLE);
-        int chartId = getArguments().getInt(ARG_CHART_ID);
 
         // 初始化 TextView 和 LineChart
-        TextView tvTable = view.findViewById(R.id.tv_table_raw);
-        LineChart lineChart = view.findViewById(R.id.lineChart_raw);
+        tvTable = view.findViewById(R.id.tv_table_raw);
+        lineChart = view.findViewById(R.id.lineChart_raw);
 
         // 设置 TextView 内容
         tvTable.setText(title);
 
-        // 初始化 LineChart 数据（这里只是示例，你可以根据需求填充数据）
-        // 这里只是简单设置，你可以根据需求配置 LineChart
         setUpLineChart(lineChart);
+        //observeAnalyzeServiceData();
 
         return view;
     }
 
+    @Override
+    public void onStart() {
+        super.onStart();
+        MainActivity mainActivity = (MainActivity) getActivity();
+        if (mainActivity != null && mainActivity.getAnalyzeService() != null) {
+            // 服务已初始化，开始观察数据
+            observeAnalyzeServiceData();
+        } else {
+            // 如果服务未初始化，等到后续再绑定
+            mainActivity.setAnalyzeServiceReadyListener(new MainActivity.OnAnalyzeServiceReadyListener() {
+                @Override
+                public void onServiceReady() {
+                    observeAnalyzeServiceData(); // 服务准备好后设置观察者
+                }
+            });
+        }
+    }
     private void setUpLineChart(LineChart lineChart) {
-        // 设置 LineChart 的配置，添加数据
-        // 这里只是简单的配置，可以根据需求进一步完善
+        lineChart.setDragEnabled(true);
+        lineChart.setScaleEnabled(true);
+        lineChart.getDescription().setEnabled(false);
+        lineChart.setTouchEnabled(true);
+    }
+
+    private void updateLineChart(LineChart lineChart, List<Integer> data, int maxRange) {
         List<Entry> entries = new ArrayList<>();
-        entries.add(new Entry(0, 1));
-        entries.add(new Entry(1, 2));
-        entries.add(new Entry(2, 3));
-        LineDataSet dataSet = new LineDataSet(entries, "Sample Data");
-        lineChart.setData(new LineData(dataSet));
+
+        // 处理数据，只保留最新的数据
+        for (int i = 0; i < data.size(); i++) {
+            entries.add(new Entry(i, data.get(i)));
+        }
+
+        LineDataSet dataSet = new LineDataSet(entries, "Raw data");
+        dataSet.setDrawCircles(true);
+        dataSet.setColor(getResources().getColor(R.color.black));
+        dataSet.setValueTextColor(getResources().getColor(R.color.blue));
+        dataSet.setValueTextSize(10f);
+
+        LineData lineData = new LineData(dataSet);
+        lineChart.setData(lineData);
         lineChart.invalidate(); // 刷新图表
+    }
+
+    private void observeAnalyzeServiceData() {
+        MainActivity mainActivity = (MainActivity) getActivity();
+        assert mainActivity != null;
+        AnalyzeService analyzeService = mainActivity.getAnalyzeService();
+
+        analyzeService.getRawLiveData().observe(getViewLifecycleOwner(), rawData -> {
+            raw.clear();
+            raw.addAll(rawData);
+            updateLineChart(lineChart, raw, 1000);
+        });
     }
 }
 

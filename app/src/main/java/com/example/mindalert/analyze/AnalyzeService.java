@@ -141,7 +141,7 @@ public class AnalyzeService extends Service {
                             // 每隔5秒读取一次wave.txt和perclos.txt
                             readWaveFile();  // 自定义方法，读取wave.txt
                             readPerclosFile();  // 自定义方法，读取perclos.txt
-                            Thread.sleep(5000);
+                            Thread.sleep(500);
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
@@ -156,9 +156,9 @@ public class AnalyzeService extends Service {
                 public void run() {
                     while (isReading) {
                         try {
-                            // 每隔0.1秒读取一次raw.txt
+                            // 每隔0.05秒读取一次raw.txt
                             readRawFile();  // 自定义方法，读取raw.txt
-                            Thread.sleep(100);
+                            Thread.sleep(50);
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
@@ -180,7 +180,7 @@ public class AnalyzeService extends Service {
             readingRawThread.interrupt();  // 中断线程，停止读取
         }
     }
-
+    int readWaveLine = 0;
     // 读取文件的具体实现
     private void readWaveFile() {
         InputStream fis = null;
@@ -191,8 +191,8 @@ public class AnalyzeService extends Service {
             reader = new BufferedReader(new InputStreamReader(fis));
 
             String line;
-            while ((line = reader.readLine()) != null) {
-                // 每次读取一行，解析并更新数组
+            int k = readWaveLine;
+            for(int i = 0;  i < k && (line = reader.readLine()) != null; ++i){
                 if (line.startsWith("Delta:")) {
                     int deltaValue = Integer.parseInt(line.split(":")[1].trim());
                     delta.add(deltaValue);
@@ -225,10 +225,46 @@ public class AnalyzeService extends Service {
                         gamma.remove(0);
                     }
                 }
-
-                // 每次读取一行都进行日志输出
-                Log.d("AnalyzeService", "Reading data from /raw/wave.txt: " + line);
             }
+            readWaveLine++;
+//            while ((line = reader.readLine()) != null) {
+//                // 每次读取一行，解析并更新数组
+//                if (line.startsWith("Delta:")) {
+//                    int deltaValue = Integer.parseInt(line.split(":")[1].trim());
+//                    delta.add(deltaValue);
+//                    // 保证 ArrayList 长度不超过 8
+//                    if (delta.size() > 8) {
+//                        delta.remove(0); // 移除最前面的元素
+//                    }
+//                } else if (line.startsWith("Theta:")) {
+//                    int thetaValue = Integer.parseInt(line.split(":")[1].trim());
+//                    theta.add(thetaValue);
+//                    if (theta.size() > 8) {
+//                        theta.remove(0);
+//                    }
+//                } else if (line.startsWith("Alpha:")) {
+//                    int alphaValue = Integer.parseInt(line.split(":")[1].trim());
+//                    alpha.add(alphaValue);
+//                    if (alpha.size() > 8) {
+//                        alpha.remove(0);
+//                    }
+//                } else if (line.startsWith("Beta:")) {
+//                    int betaValue = Integer.parseInt(line.split(":")[1].trim());
+//                    beta.add(betaValue);
+//                    if (beta.size() > 8) {
+//                        beta.remove(0);
+//                    }
+//                } else if (line.startsWith("Gamma:")) {
+//                    int gammaValue = Integer.parseInt(line.split(":")[1].trim());
+//                    gamma.add(gammaValue);
+//                    if (gamma.size() > 8) {
+//                        gamma.remove(0);
+//                    }
+//                }
+//
+//                // 每次读取一行都进行日志输出
+//                Log.d("AnalyzeService", "Reading data from /raw/wave.txt: " + line);
+//            }
 
 
         } catch (IOException e) {
@@ -250,7 +286,7 @@ public class AnalyzeService extends Service {
         Log.d("AnalyzeService", "Beta: " + beta);
         Log.d("AnalyzeService", "Gamma: " + gamma);
     }
-
+    int readPerclosLine = 0;
     private void readPerclosFile() {
         InputStream fis = null;
         BufferedReader reader = null;
@@ -260,19 +296,32 @@ public class AnalyzeService extends Service {
             reader = new BufferedReader(new InputStreamReader(fis));
 
             String line;
-            while ((line = reader.readLine()) != null) {
-                // 每次读取一行，解析并更新数组
+
+            int perclosValue = 0;
+            int k = readPerclosLine;
+            for(int i = 0;  i < k && (line = reader.readLine()) != null; ++i){
                 if (line.startsWith("Perclos:")) {
-                    int perclosValue = Integer.parseInt(line.split(":")[1].trim());
+                    perclosValue = Integer.parseInt(line.split(":")[1].trim());
                     perclos.add(perclosValue);
-                    // 保证 ArrayList 长度不超过 8
-                    if (perclos.size() > 8) {
+                    if (perclos.size() > 10) {
                         perclos.remove(0); // 移除最前面的元素
                     }
                 }
-                // 每次读取一行都进行日志输出
-                Log.d("AnalyzeService", "Reading data from /raw/perclos.txt: " + line);
             }
+            readPerclosLine++;
+//            while ((line = reader.readLine()) != null) {
+//                // 每次读取一行，解析并更新数组
+//                if (line.startsWith("Perclos:")) {
+//                    int perclosValue = Integer.parseInt(line.split(":")[1].trim());
+//                    perclos.add(perclosValue);
+//                    // 保证 ArrayList 长度不超过 8
+//                    if (perclos.size() > 8) {
+//                        perclos.remove(0); // 移除最前面的元素
+//                    }
+//                }
+//                // 每次读取一行都进行日志输出
+//                Log.d("AnalyzeService", "Reading data from /raw/perclos.txt: " + line);
+//            }
 
 
         } catch (IOException e) {
@@ -288,7 +337,7 @@ public class AnalyzeService extends Service {
         updatePerclosData(perclos);
         Log.d("AnalyzeService", "Perclos: " + perclos);
     }
-
+    private int readRawLine = 0;
     private void readRawFile() {
         InputStream fis = null;
         BufferedReader reader = null;
@@ -296,23 +345,28 @@ public class AnalyzeService extends Service {
         try {
             fis = getResources().openRawResource(R.raw.raw); // 获取文件输入流
             reader = new BufferedReader(new InputStreamReader(fis));
-
             String line;
-            while ((line = reader.readLine()) != null) {
-                // 每次读取一行，解析并更新数组
-                if (line.startsWith("raw:")) {
-                    int rawValue = Integer.parseInt(line.split(":")[1].trim());
+            int rawValue = 0;
+            int k = readRawLine;
+            for(int i = 0;  i < k && (line = reader.readLine()) != null; ++i){
+                if (line.startsWith("Raw:")) {
+                     rawValue = Integer.parseInt(line.split(":")[1].trim());
                     raw.add(rawValue);
-                    // 保证 ArrayList 长度不超过 8
-                    if (raw.size() > 8) {
+                    if (raw.size() > 40) {
                         raw.remove(0); // 移除最前面的元素
                     }
                 }
-                // 每次读取一行都进行日志输出
-                Log.d("AnalyzeService", "Reading data from /raw/raw.txt: " + line);
             }
-
-
+            readRawLine++;
+//            while ((line = reader.readLine()) != null) {
+//                if (line.startsWith("Raw:")) {
+//                    rawValue = Integer.parseInt(line.replace("Raw:", "").trim());
+//                }
+//                raw.add(rawValue);
+//                if (raw.size() > 8) {
+//                    raw.remove(0); // 移除最前面的元素
+//                }
+//            }
         } catch (IOException e) {
             e.printStackTrace();
         } finally {

@@ -24,8 +24,8 @@ public class TabWaveFragment extends Fragment {
 
     private static final String ARG_TITLE1 = "title1";
     private static final String ARG_CHART_ID1 = "chart_id1";
-    private static final String ARG_TITLE2 = "title1";
-    private static final String ARG_CHART_ID2 = "chart_id1";
+    private static final String ARG_TITLE2 = "title2";
+    private static final String ARG_CHART_ID2 = "chart_id2";
 
     private LineChart lineChart1, lineChart2;
     private TextView tvTable1, tvTable2;
@@ -73,9 +73,27 @@ public class TabWaveFragment extends Fragment {
         setUpLineChart(lineChart2);
 
         // 设置观察者，监听 AnalyzeService 中的数据变化
-        observeAnalyzeServiceData();
+        //observeAnalyzeServiceData();
 
         return view;
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        MainActivity mainActivity = (MainActivity) getActivity();
+        if (mainActivity != null && mainActivity.getAnalyzeService() != null) {
+            // 服务已初始化，开始观察数据
+            observeAnalyzeServiceData();
+        } else {
+            // 如果服务未初始化，等到后续再绑定
+            mainActivity.setAnalyzeServiceReadyListener(new MainActivity.OnAnalyzeServiceReadyListener() {
+                @Override
+                public void onServiceReady() {
+                    observeAnalyzeServiceData(); // 服务准备好后设置观察者
+                }
+            });
+        }
     }
 
     private void setUpLineChart(LineChart lineChart) {
@@ -142,7 +160,7 @@ public class TabWaveFragment extends Fragment {
             entries.add(new Entry(i, data.get(i)));
         }
 
-        LineDataSet dataSet = new LineDataSet(entries, "Real-Time Data");
+        LineDataSet dataSet = new LineDataSet(entries, "Delta");
         dataSet.setDrawCircles(true);
         dataSet.setColor(getResources().getColor(R.color.black));
         dataSet.setValueTextColor(getResources().getColor(R.color.blue));

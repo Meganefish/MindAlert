@@ -32,9 +32,6 @@ public class MainActivity extends AppCompatActivity {
     private Button btnAnalyze, btnMap, btnMusic, btnOptions;
     //private FloatingActionButton fabConnect;
     private static Context context;
-    //private float dX, dY; // 初始坐标偏移量
-    //private float initialX, initialY; // 初始位置
-    //private static final int CLICK_THRESHOLD = 100; // 点击的阈值
     private AnalyzeService analyzeService;
     private MusicService musicService;
     //private boolean isDataRead = false;
@@ -100,7 +97,7 @@ public class MainActivity extends AppCompatActivity {
             Log.e(TAG, "Failed to bind AnalyzeService");  // 检查服务绑定是否成功
         }
 
-        // 启动 MusicService
+         //启动 MusicService
         Intent musicIntent = new Intent(this, MusicService.class);
         startService(musicIntent);
         boolean musicServiceBound =  this.bindService(musicIntent, musicServiceConnection, Context.BIND_AUTO_CREATE);
@@ -112,7 +109,6 @@ public class MainActivity extends AppCompatActivity {
         btnMap = findViewById(R.id.btn_map);
         btnMusic = findViewById(R.id.btn_music);
         btnOptions = findViewById(R.id.btn_options);
-        //fabConnect = findViewById(R.id.fab_connect);
 
         // 设置按钮点击事件
         btnAnalyze.setOnClickListener(v -> replaceFragment(new AnalyzeFragment()));
@@ -120,50 +116,18 @@ public class MainActivity extends AppCompatActivity {
         btnMusic.setOnClickListener(v -> replaceFragment(new MusicFragment()));
         btnOptions.setOnClickListener(v -> replaceFragment(new OptionsFragment()));
 
-//        fabConnect.setOnTouchListener(new View.OnTouchListener() {
-//            @Override
-//            public boolean onTouch(View view, MotionEvent event) {
-//                switch (event.getAction()){
-//                    case MotionEvent.ACTION_DOWN:
-//                        dX = view.getX() - event.getRawX();
-//                        dY = view.getY() - event.getRawY();
-//                        initialX = event.getRawX();
-//                        initialY = event.getRawY();
-//                        Log.d(TAG,"Fab downed");
-//                        break;
-//                    case MotionEvent.ACTION_MOVE:
-//                        view.animate()
-//                                .x(event.getRawX() + dX)
-//                                .y(event.getRawY() + dY)
-//                                .setDuration(0)
-//                                .start();
-//
-//                        Log.d(TAG,"Fab moved");
-//                    case MotionEvent.ACTION_UP:
-//                        float finalX = event.getRawX();
-//                        float finalY = event.getRawY();
-//                        if (Math.abs(finalX - initialX) < CLICK_THRESHOLD && Math.abs(finalY - initialY) < CLICK_THRESHOLD) {
-//                            // 如果拖动距离在阈值内，视为点击
-//                            Log.d(TAG,"Fab clicked");
-//                            view.performClick(); // 调用View的点击方法
-//                        }
-//                        break;
-//                    default:
-//                        return false;
-//                }
-//                return true;
-//            }
-//        });
-//        fabConnect.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                if(!isDataRead)
-//                    analyzeService.startReadingData();
-//                isDataRead = true;
-//            }
-//        });
         // 默认显示 AnalyzeFragment
         replaceFragment(new AnalyzeFragment());
+    }
+
+    protected void onStart() {
+        super.onStart();
+        // 确保服务已经准备好
+        if (analyzeService != null) {
+            if (analyzeServiceReadyListener != null) {
+                analyzeServiceReadyListener.onServiceReady(); // 通知 Fragment 服务已经准备好
+            }
+        }
     }
 
     @Override
@@ -222,5 +186,17 @@ public class MainActivity extends AppCompatActivity {
                 AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
                 break;
         }
+    }
+
+    private OnAnalyzeServiceReadyListener analyzeServiceReadyListener;
+
+    // 定义一个接口，用于通知 Fragment 当服务准备好时调用
+    public interface OnAnalyzeServiceReadyListener {
+        void onServiceReady();
+    }
+
+    // 提供一个方法供 Fragment 注册监听器
+    public void setAnalyzeServiceReadyListener(OnAnalyzeServiceReadyListener listener) {
+        this.analyzeServiceReadyListener = listener;
     }
 }
